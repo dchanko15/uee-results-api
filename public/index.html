@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <base href="/VueTest2/public/">
+    <title>VueTest</title>
+    <link rel='stylesheet' href='css/fas.min.css'/>
+    <link rel='stylesheet' href='css/style.css'/>
+    <link rel='stylesheet' href='css/geowebfonts.css'/>
+    <link rel='stylesheet' href='css/font_bpg_arial.css'/>
+    <link rel='stylesheet' href='css/flexboxgrid2.min.css'/>
+    <link rel='stylesheet' href='css/keen-ui.min.css'/>
+
+</head>
+<body style="overflow-y: scroll">
+
+<div id="app" >
+    <router-view></router-view>
+</div>
+<script src="js/scripts.js"></script>
+<script src="js/vue.js"></script>
+<script src="js/vee-validate.min.js"></script>
+<script src="js/ka.js"></script>
+<script src="js/vue-router.js"></script>
+<script src="js/keen-ui.min.js"></script>
+<script src="js/httpVueLoader.min.js"></script>
+<script src="js/axios.min.js"></script>
+<script src="js/servervalidation.js"></script>
+
+
+<script type="text/javascript">
+
+    let index = httpVueLoader('components/index.vue');
+
+    axios.defaults.withCredentials = true;
+
+    const Roles = {
+        guest: -1,
+        applicant: 1,
+        user: 2,
+        admin: 3,
+    };
+
+    const globalState = {
+        apiUrl: "http://localhost:3000",
+        user: {
+            candidateId: 0,
+            role: Roles.guest,
+            lastName: "",
+            firstName: "",
+        }
+    };
+
+
+    const router = new VueRouter({
+        mode: 'history',
+        base: "/VueTest2/public/",
+        routes: [
+            {path: '/', component: index},
+            {path: '/reg', component: httpVueLoader('components/v-register.vue')},
+            {path: '/login', component: httpVueLoader('components/v-login.vue')},
+            {path: '/restricted', component: httpVueLoader('components/v-restricted.vue')},
+            {path: '/changepass', component: httpVueLoader('components/vChangePass.vue')},
+            {path: '/home', component: httpVueLoader('components/v-home.vue'), meta: {role: Roles.applicant}},
+            {path: '/profile', component: httpVueLoader('components/v-profile.vue'), meta: {role: Roles.applicant}},
+        ]
+    });
+
+    router.beforeEach((to, from, next) => {
+        if (to.meta.role && globalState.user.role !== to.meta.role) {
+            next({
+                path: '/restricted',
+            })
+        } else {
+            next()
+        }
+    });
+
+    Vue.use(VeeValidate, {
+        events: 'blur',
+        locale: 'ka',
+    });
+
+    Vue.component('bg', httpVueLoader('components/background.vue')) ;
+
+    new Vue({
+        router,
+        globalState,
+    }).$mount("#app");
+
+</script>
+
+
+</body>
+</html>

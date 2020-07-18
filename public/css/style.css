@@ -1,0 +1,120 @@
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+}
+
+html {
+    font-size: 90%;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: bpg_Arial, sans-serif;
+    font-size: 0.9em;
+}
+
+hr {
+    margin: 1em 0;
+    opacity: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: bpg_web_001_caps, sans-serif;
+    margin-top: 1em;
+    margin-bottom: 0.7em;
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: 2.5em;
+}
+
+h2 {
+    font-size: 2em;
+}
+
+h3 {
+    font-size: 1.5em;
+}
+
+h4 {
+    font-size: 1.1em;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    font-weight: 400;
+}
+
+
+.button {
+    display: inline-block;
+    margin: 5px;
+    border: 2px solid #0d84a5;
+    background: transparent;
+    cursor: pointer;
+    font-family: bpg_web_001_caps, sans-serif;
+    font-size: 1.2em;
+    padding: 0.7em 1.2em 0.5em 1.2em;
+    min-width: 170px;
+    border-radius: 100px;
+    color: #0d6d8e;
+    transition: 0.3s;
+    align-items: center;
+    text-decoration: none;
+}
+.inverse {
+    border-color: white;
+    color: white;
+    opacity: 1;
+}
+
+.button:hover {
+    border: 2px solid #149dcc;
+    color: white;
+    background-color: #149dcc;
+    box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.2) !important;
+}
+
+section {
+    -border: 1px solid silver;
+    border-radius: 5px;
+    box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.2) !important;
+    font-family: bpg_Arial, sans-serif;
+    font-size: 1.07em;
+    line-height: 1.4em;
+    padding: 2em;
+    color: rgba(0, 0, 0, 0.8);
+    margin: 1em;
+}
+
+.blink {
+    animation-duration: 800ms;
+    animation-name: blinkFrames;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    animation-timing-function: ease-in-out;
+}
+
+.hidden {
+    display: none;
+}
+.visible {
+    display: block;
+}
+
+.header {
+    margin-top: 0.5em;
+    margin-bottom: 1em;
+}
+
+@keyframes blinkFrames {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
