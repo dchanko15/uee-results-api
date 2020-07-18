@@ -1,5 +1,5 @@
 let createError = require('http-errors');
-let dotenv = require('dotenv').config();
+let dotenv = require('dotenv').config({});
 
 let express = require('express');
 let path = require("path");
