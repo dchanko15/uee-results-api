@@ -179,6 +179,12 @@ module.exports = {
 
         let err = "";
         try {
+            if (req.session.entrantId) {
+                err = "სისტემური შეცდომაა(code: 21). დახურეთ ბრაუზერი და თავიდან სცადეთ.";
+                res.json({err});
+                return;
+            }
+
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 console.error(errors.array());
@@ -219,12 +225,12 @@ module.exports = {
         let entrantId = -1;
         let err = "";
 
-
         if (!req.session.entrantId) {
             err = "სისტემური შეცდომაა(code: 21). დახურეთ ბრაუზერი და თავიდან სცადეთ.";
             res.json({err});
             return;
         }
+
         entrantId = req.session.entrantId;
 
         let ueedb_1_conn = req.app.get("ueedb_1_conn"),
