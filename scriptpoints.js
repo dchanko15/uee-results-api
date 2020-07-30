@@ -8,6 +8,7 @@ let sqlEngine = require("mssql"),
     path = require("path"),
     memcached = require("./memcachPromise"),
     db = require("./msdb");
+let sms = require('./smssender');
 
 
 let _loginSchema = [
@@ -115,7 +116,7 @@ async function getSubjectPoints(ueedb_1, ueedb_2, entrantId, subject) {
 async function getGrantSubjectAmounts(ueedb_2) {
     let ueedb_2_request = new sqlEngine.Request(ueedb_2);
     let response = await ueedb_2_request.query(
-         "SELECT [SubjectGroupID]\n" +
+        "SELECT [SubjectGroupID]\n" +
         "      ,[Cnt]\n" +
         "      ,[cAmount] Amount\n" +
         "      ,[GrantGroup]\n" +
@@ -145,7 +146,7 @@ async function getEntrantGrantScores(ueedb_2, entrantId) {
     let ueedb_2_request = new sqlEngine.Request(ueedb_2);
     ueedb_2_request.input("EntrantID", entrantId);
     let response = await ueedb_2_request.query(
- "WITH _scripts AS (\n" +
+        "WITH _scripts AS (\n" +
         "SELECT t1.EntrantID, t2.SubjectGroupId, t3.Name SubjectGroupName, t1.ScaledPoints\n" +
         "FROM tScripts t1\n" +
         "JOIN tSubjects t2 ON t1.SubjectID = t2.ID\n" +
@@ -195,18 +196,20 @@ module.exports = {
                 pool = await db.connect();
 
                 let rows = await db.execQuery(pool,
-                    "select ID EntrantId " +
-                    " from tEntrants " +
-                    " where idNum = :user and [ExamPaperNum] =:password and [EntrantTypeID]=1", {user, password});
+
+                    "select ID EntrantID, IDNum, t2.Password \n" +
+                    "from tEntrants t1\n" +
+                    "join CredentialsDB.dbo.tCredentials t2 on t1.IDNum = t2.Email\n" +
+                    "where t1.EntrantTypeID = 1 and t1.IDNum = :user and t2.Password =:password", {user, password});
 
                 if (rows.length === 1) {
-                    EntrantId = +rows[0].EntrantId;
+                    EntrantId = +rows[0].EntrantID;
                     req.session.entrantId = +EntrantId;
 
                     // let stageData = await db.execQuery(pool,"")
 
                 } else
-                    err = 'მომხმარებელი ვერ მოიძებნა.';
+                    err = 'აპლიკანის პირადი ნომერი ან პაროლი არასწორია!';
             }
             if (!err) {
                 res.json({EntrantId});
@@ -219,6 +222,45 @@ module.exports = {
         } finally {
             await db.close(pool);
         }
+
+    },
+    async newPassword(req, res, next) {
+        let pool;
+        let IDNum = "";
+        let err = "";
+
+        try {
+            IDNum = req.body.IDNum;
+
+            pool = await db.connect();
+
+            let rows = await db.execQuery(pool,
+                "select ContactPhone from tEntrants\n" +
+                "where IDNum = :IDNum and EntrantTypeID = 1", {IDNum});
+
+            if (rows.length === 1) {
+                let contacPhone = rows[0].ContactPhone;
+                let np = Math.floor(Math.random() * 100000);
+
+                await db.execQuery(pool,
+                    "UPDATE [CredentialsDB].[dbo].[tCredentials]\n" +
+                    "SET [Password] = :np\n" +
+                    "WHERE [Email] = :IDNum", {IDNum, np});
+
+                sms.SendSms(contacPhone, "sistemaSi Sesasvlelad gamoiyenet paroli: " + np);
+
+            } else
+                err = 'სისტემური შეცდომაა(code: 22). დახურეთ ბრაუზერი და თავიდან სცადეთ.';
+            res.send("ok");
+
+
+        } catch (err) {
+            console.error(err);
+            next(err);
+        } finally {
+            await db.close(pool);
+        }
+
 
     },
     async getScriptPoionts(req, res, next) {
@@ -528,7 +570,6 @@ module.exports = {
     async getGrants(req, res, next) {
         let entrantId = -1;
         let err = "";
-
 
 
         if (!req.session.entrantId) {
