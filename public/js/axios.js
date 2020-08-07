@@ -851,7 +851,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var normalizeHeaderName = __webpack_require__(12);
 	
 	var DEFAULT_CONTENT_TYPE = {
-	  'Content-Type': 'application/x-www-form-urlencoded'
+	  'Content-Type': 'application/x-uee-res-api-form-urlencoded'
 	};
 	
 	function setContentTypeIfUnset(headers, value) {
@@ -892,7 +892,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return data.buffer;
 	    }
 	    if (utils.isURLSearchParams(data)) {
-	      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+	      setContentTypeIfUnset(headers, 'application/x-uee-res-api-form-urlencoded;charset=utf-8');
 	      return data.toString();
 	    }
 	    if (utils.isObject(data)) {

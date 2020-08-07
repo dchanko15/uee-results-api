@@ -7,11 +7,12 @@ let router = express.Router();
 router.post('/login', apiScripts.loginSchema, apiScripts.login);
 router.post('/new-pass', apiScripts.newPassword);
 
-router.get('/scripts', apiScripts.getScriptPoionts);
+router.post('/scripts', apiScripts.getScriptPoionts);
 router.get('/scriptimage', apiScripts.getScriptImage);
 router.get('/admission', apiScripts.getAdmission);
 router.get('/scores', apiScripts.getScores);
 router.get('/clear-cache', apiScripts.clearCache);
+router.get('/remove-one-from-cache', apiScripts.removeOneFromCache);
 router.post('/getsubjectitempoints', apiScripts.getSubjectItemPints);
 router.post('/getallsubjectitempoints', apiScripts.getAllSubjectItemPints);
 router.post('/getgrantdata', apiScripts.getGrants);

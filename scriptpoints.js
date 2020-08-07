@@ -180,11 +180,11 @@ module.exports = {
 
         let err = "";
         try {
-            if (req.session.entrantId) {
-                err = "სისტემური შეცდომაა(code: 21). დახურეთ ბრაუზერი და თავიდან სცადეთ.";
-                res.json({err});
-                return;
-            }
+            /*   if (req.session.entrantId) {
+                   err = "სისტემური შეცდომაა(code: 21). დახურეთ ბრაუზერი და თავიდან სცადეთ.";
+                   res.json({err});
+                   return;
+               }*/
 
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -266,20 +266,22 @@ module.exports = {
     async getScriptPoionts(req, res, next) {
         let entrantId = -1;
         let err = "";
-
-        if (!req.session.entrantId) {
-            err = "სისტემური შეცდომაა(code: 21). დახურეთ ბრაუზერი და თავიდან სცადეთ.";
-            res.json({err});
-            return;
-        }
-
-        entrantId = req.session.entrantId;
-
-        let ueedb_1_conn = req.app.get("ueedb_1_conn"),
-            ueedb_2_conn = req.app.get("ueedb_2_conn");
-
-        let ueedb_1, ueedb_2;
         try {
+            let entrantId = +req.body.entrantId;
+
+            if (req.session && req.session.entrantId !== entrantId) {
+                err = "სისტემური შეცდომაა(code: 21). დახურეთ ბრაუზერი და თავიდან სცადეთ.";
+                res.json({err});
+                return;
+            }
+
+            entrantId = req.session.entrantId;
+
+            let ueedb_1_conn = req.app.get("ueedb_1_conn"),
+                ueedb_2_conn = req.app.get("ueedb_2_conn");
+
+            let ueedb_1, ueedb_2;
+
             ueedb_1 = new sqlEngine.ConnectionPool(ueedb_1_conn);
             ueedb_2 = new sqlEngine.ConnectionPool(ueedb_2_conn);
             await Promise.all([ueedb_1.connect(), ueedb_2.connect()]);
@@ -337,6 +339,15 @@ module.exports = {
     async getScriptImage(req, res, next) {
         let barcodes;
         let ueedb_1, ueedb_2;
+
+        let entrantId = +req.query.id;
+
+        if (req.session && req.session.entrantId !== entrantId) {
+
+            res.status(404).send("<strong style='color: maroon'>სისტემური შეცდომაა(code: 21). დახურეთ ბრაუზერი და თავიდან სცადეთ.</strong>");
+            return;
+        }
+
 
         if (req.session && req.session.barcodes)
             barcodes = req.session.barcodes;
@@ -474,9 +485,21 @@ module.exports = {
         }
 
     },
+
+    async removeOneFromCache(req, res){
+        try {
+            let key = req.query.id;
+            await memcached.remove(key);
+            res.send("Cache cleared for: " + key);
+        } catch (e) {
+            res.send(e);
+        }
+    },
+
     async getSubjectItemPints(req, res, next) {
         let entrantId = -1;
         let err = "";
+        let ueedb_1, ueedb_2;
 
 
         if (!req.session.entrantId) {
@@ -498,7 +521,7 @@ module.exports = {
         let ueedb_1_conn = req.app.get("ueedb_1_conn"),
             ueedb_2_conn = req.app.get("ueedb_2_conn");
 
-        let ueedb_1, ueedb_2;
+
         try {
             ueedb_1 = new sqlEngine.ConnectionPool(ueedb_1_conn);
             ueedb_2 = new sqlEngine.ConnectionPool(ueedb_2_conn);
@@ -525,20 +548,22 @@ module.exports = {
     async getAllSubjectItemPints(req, res, next) {
         let entrantId = -1;
         let err = "";
-
-        if (!req.session.entrantId) {
-            err = "სისტემური შეცდომაა(code: 21). დახურეთ ბრაუზერი და თავიდან სცადეთ.";
-            res.json({err});
-            return;
-        }
-        entrantId = req.session.entrantId;
-        let barcodes = req.session.barcodes;
-
-        let ueedb_1_conn = req.app.get("ueedb_1_conn"),
-            ueedb_2_conn = req.app.get("ueedb_2_conn");
-
         let ueedb_1, ueedb_2;
         try {
+            entrantId = +req.body.entrantId;
+            if (req.session && req.session.entrantId !== entrantId) {
+                err = "სისტემური შეცდომაა(code: 21). დახურეთ ბრაუზერი და თავიდან სცადეთ.";
+                res.json({err});
+                return;
+            }
+            entrantId = req.session.entrantId;
+            let barcodes = req.session.barcodes;
+
+            let ueedb_1_conn = req.app.get("ueedb_1_conn"),
+                ueedb_2_conn = req.app.get("ueedb_2_conn");
+
+
+
             ueedb_1 = new sqlEngine.ConnectionPool(ueedb_1_conn);
             ueedb_2 = new sqlEngine.ConnectionPool(ueedb_2_conn);
             await Promise.all([ueedb_1.connect(), ueedb_2.connect()]);
