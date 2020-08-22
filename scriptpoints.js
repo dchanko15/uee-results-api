@@ -38,7 +38,7 @@ async function getScriptTemplates(subjectID, ueedb_2) {
              ,[ItemNum] DisplayName\
              ,[ItemOrder]\
          FROM [tScriptTaskTemplates]\
-         WHERE variant = 1 and SubjectID=@SubjectID \
+         WHERE SubjectID=@SubjectID and variant =1   \
          ORDER BY ItemOrder, TemplateID"
     );
     return response.recordset;
@@ -266,6 +266,7 @@ module.exports = {
     async getScriptPoionts(req, res, next) {
         let entrantId = -1;
         let err = "";
+        let ueedb_1, ueedb_2;
         try {
             let entrantId = +req.body.entrantId;
 
@@ -280,7 +281,7 @@ module.exports = {
             let ueedb_1_conn = req.app.get("ueedb_1_conn"),
                 ueedb_2_conn = req.app.get("ueedb_2_conn");
 
-            let ueedb_1, ueedb_2;
+
 
             ueedb_1 = new sqlEngine.ConnectionPool(ueedb_1_conn);
             ueedb_2 = new sqlEngine.ConnectionPool(ueedb_2_conn);
