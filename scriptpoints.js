@@ -84,8 +84,7 @@ async function getAdmission(entrantID, ueedb_2) {
         "                      tAdmissions.Score, tAdmissions.Choice/10 Choice, isnull(isnull(tGrants.RatingNum, tGrantsProf.RatingNum),tGrantsProf2.RatingNum) AS RatingNum, isnull(isnull(tGrants.Amount, tGrantsProf.Amount),tGrantsProf2.Amount) AS GrantAmount\n" +
         "FROM         tAdmissions INNER JOIN\n" +
         "                     tSpecialities ON tAdmissions.SpecialityID = tSpecialities.ID left  JOIN\n" +
-        "                      tFaculties on tSpecialities.FacultyID = tFaculties.ID  left join\n" +
-        "                      tUniversities ON tFaculties.UniversityID = tUniversities.ID left JOIN\n" +
+        "                      tUniversities ON tSpecialities.FacultyID = tUniversities.ID left JOIN\n" +
         "                      tGrants ON tAdmissions.EntrantID = tGrants.EntrantID and amount is not null left JOIN\n" +
         "                      tGrantsProf ON tAdmissions.EntrantID = tGrantsProf.EntrantID left JOIN\n" +
         "                      tGrantsProf2 ON tAdmissions.EntrantID = tGrantsProf2.EntrantID\n" +
@@ -117,9 +116,9 @@ async function getGrantSubjectAmounts(ueedb_2) {
     let ueedb_2_request = new sqlEngine.Request(ueedb_2);
     let response = await ueedb_2_request.query(
         "SELECT [SubjectGroupID]\n" +
-        "      ,[Cnt]\n" +
+        "      ,EntrantCnt as [Cnt]\n" +
         "      ,[cAmount] Amount\n" +
-        "      ,[GrantGroup]\n" +
+        "      ,1 [GrantGroup]\n" +
         "  FROM [dbo].[tGrantSubjectAmounts]\n" +
         "  where Step =1"
     );
@@ -132,7 +131,7 @@ async function getGrantMinScores(ueedb_2) {
         "SELECT \n" +
         "\tt1.SubjectGroupID \n" +
         "\t,RatingNum\n" +
-        "\t,min(grantScore)/10.0 MinGrantScore\n" +
+        "\t,min(grantScore)/100.0 MinGrantScore\n" +
         "FROM [dbo].[tGrants] t1\n" +
         "  join tSubjectGroups t2 on t1.SubjectGroupID = t2.ID\n" +
         "  where Amount is not null\n" +
@@ -147,21 +146,21 @@ async function getEntrantGrantScores(ueedb_2, entrantId) {
     ueedb_2_request.input("EntrantID", entrantId);
     let response = await ueedb_2_request.query(
         "WITH _scripts AS (\n" +
-        "SELECT t1.EntrantID, t2.SubjectGroupId, t3.Name SubjectGroupName, t1.ScaledPoints\n" +
+        "SELECT t1.EntrantID, t2.SubjectGroupId, t3.Name SubjectGroupName, t1.ScaledPoints/10.0 ScaledPoints\n" +
         "FROM tScripts t1\n" +
         "JOIN tSubjects t2 ON t1.SubjectID = t2.ID\n" +
         "JOIN tSubjectGroups t3 ON t2.SubjectGroupId = t3.ID\n" +
         "WHERE EntrantID = @EntrantID\n" +
         "),\n" +
         "_grants AS (\n" +
-        "SELECT * FROM tGrants \n" +
+        "SELECT *  FROM tGrants \n" +
         "WHERE EntrantID = @EntrantID\n" +
         ")\n" +
-        "SELECT t0.EntrantID, t0.SubjectGroupID, t4.SubjectGroupName, t0.Granted, t0.GrantScore, t0.Amount, t0.RatingNum, " +
-        "t1.ScaledPoints Geo,t2.ScaledPoints Gat,t3.ScaledPoints [Foreign],t4.ScaledPoints Alt\n" +
+        "SELECT t0.EntrantID, t0.SubjectGroupID, t4.SubjectGroupName, t0.Granted, t0.GrantScore/100.0 GrantScore, t0.Amount, t0.RatingNum, " +
+        "t1.ScaledPoints Geo,0 Gat,t3.ScaledPoints [Foreign],t4.ScaledPoints Alt\n" +
         "FROM _grants t0\n" +
         "JOIN _scripts t1 ON t1.SubjectGroupId = 1 --AND t1.EntrantID = t0.EntrantID\n" +
-        "JOIN _scripts t2 ON t2.SubjectGroupId = 2 --AND t2.EntrantID = t0.EntrantID\n" +
+
         "JOIN _scripts t3 ON t3.SubjectGroupId = 3 --AND t3.EntrantID = t0.EntrantID\n" +
         "JOIN _scripts t4 ON t4.SubjectGroupId = t0.SubjectGroupId\n" +
         "ORDER BY Granted desc, SubjectGroupID"
