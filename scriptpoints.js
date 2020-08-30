@@ -131,7 +131,7 @@ async function getGrantMinScores(ueedb_2) {
         "SELECT \n" +
         "\tt1.SubjectGroupID \n" +
         "\t,RatingNum\n" +
-        "\t,min(grantScore)/100.0 MinGrantScore\n" +
+        "\t,min(grantScore)/10.0 MinGrantScore\n" +
         "FROM [dbo].[tGrants] t1\n" +
         "  join tSubjectGroups t2 on t1.SubjectGroupID = t2.ID\n" +
         "  where Amount is not null\n" +
@@ -156,7 +156,7 @@ async function getEntrantGrantScores(ueedb_2, entrantId) {
         "SELECT *  FROM tGrants \n" +
         "WHERE EntrantID = @EntrantID\n" +
         ")\n" +
-        "SELECT t0.EntrantID, t0.SubjectGroupID, t4.SubjectGroupName, t0.Granted, t0.GrantScore/100.0 GrantScore, t0.Amount, t0.RatingNum, " +
+        "SELECT t0.EntrantID, t0.SubjectGroupID, t4.SubjectGroupName, t0.Granted, t0.GrantScore/10.0 GrantScore, t0.Amount, t0.RatingNum, " +
         "t1.ScaledPoints Geo,0 Gat,t3.ScaledPoints [Foreign],t4.ScaledPoints Alt\n" +
         "FROM _grants t0\n" +
         "JOIN _scripts t1 ON t1.SubjectGroupId = 1 --AND t1.EntrantID = t0.EntrantID\n" +
