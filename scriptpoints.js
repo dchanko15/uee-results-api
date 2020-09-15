@@ -281,7 +281,6 @@ module.exports = {
                 ueedb_2_conn = req.app.get("ueedb_2_conn");
 
 
-
             ueedb_1 = new sqlEngine.ConnectionPool(ueedb_1_conn);
             ueedb_2 = new sqlEngine.ConnectionPool(ueedb_2_conn);
             await Promise.all([ueedb_1.connect(), ueedb_2.connect()]);
@@ -486,7 +485,7 @@ module.exports = {
 
     },
 
-    async removeOneFromCache(req, res){
+    async removeOneFromCache(req, res) {
         try {
             let key = req.query.id;
             await memcached.remove(key);
@@ -563,20 +562,21 @@ module.exports = {
                 ueedb_2_conn = req.app.get("ueedb_2_conn");
 
 
-
             ueedb_1 = new sqlEngine.ConnectionPool(ueedb_1_conn);
             ueedb_2 = new sqlEngine.ConnectionPool(ueedb_2_conn);
             await Promise.all([ueedb_1.connect(), ueedb_2.connect()]);
 
-            let allScriptsPoints = [];
-            for (let i = 0; i < barcodes.length; i++) {
-                let subject = {};
-                subject.SubjectID = barcodes[i].subjectID;
-                subject.BarcodeID = barcodes[i].barcodeID;
 
-                subject = await getSubjectPoints(ueedb_1, ueedb_2, entrantId, subject);
-                allScriptsPoints.push(subject);
-            }
+            let allScriptsPoints = [];
+            if (barcodes && barcodes.length > 0)
+                for (let i = 0; i < barcodes.length; i++) {
+                    let subject = {};
+                    subject.SubjectID = barcodes[i].subjectID;
+                    subject.BarcodeID = barcodes[i].barcodeID;
+
+                    subject = await getSubjectPoints(ueedb_1, ueedb_2, entrantId, subject);
+                    allScriptsPoints.push(subject);
+                }
 
             res.json({allScriptsPoints});
 
