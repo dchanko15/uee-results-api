@@ -277,6 +277,7 @@ module.exports = {
 
             entrantId = req.session.entrantId;
 
+
             let ueedb_1_conn = req.app.get("ueedb_1_conn"),
                 ueedb_2_conn = req.app.get("ueedb_2_conn");
 
@@ -506,12 +507,13 @@ module.exports = {
             res.json({err});
             return;
         }
-        entrantId = req.session.entrantId;
+        entrantId = +req.session.entrantId;
         let barcodes = req.session.barcodes;
 
-        let subjectId = req.body.subjectId;
+        let subjectId = +req.body.subjectId;
+
         let subjectBarcode = barcodes.find(function (item) {
-            return item.subjectID === +subjectId
+            return item.subjectID === subjectId
         });
 
         let barcodeId = subjectBarcode.barcodeID;
@@ -522,16 +524,22 @@ module.exports = {
 
 
         try {
-            ueedb_1 = new sqlEngine.ConnectionPool(ueedb_1_conn);
-            ueedb_2 = new sqlEngine.ConnectionPool(ueedb_2_conn);
-            await Promise.all([ueedb_1.connect(), ueedb_2.connect()]);
 
-            let subject = {};
-            subject.SubjectID = subjectId;
-            subject.BarcodeID = barcodeId;
+            let cacheName = 'ueeres-sp-' + entrantId.toString() + '-' + subjectId.toString();
+            let cachedData = await memcached.get(cacheName);
+            if (!cachedData) {
 
-            subject = await getSubjectPoints(ueedb_1, ueedb_2, entrantId, subject);
-            res.json({subject});
+                ueedb_1 = new sqlEngine.ConnectionPool(ueedb_1_conn);
+                ueedb_2 = new sqlEngine.ConnectionPool(ueedb_2_conn);
+                await Promise.all([ueedb_1.connect(), ueedb_2.connect()]);
+
+                let subject = {};
+                subject.SubjectID = subjectId;
+                subject.BarcodeID = barcodeId;
+
+                subject = await getSubjectPoints(ueedb_1, ueedb_2, entrantId, subject);
+                res.json({subject});
+            } else res.json({subject: cachedData});
 
         } catch
             (err) {
