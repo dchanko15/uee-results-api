@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "async": "^2.6.1",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "connect-memcached": "^1.0.0",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
